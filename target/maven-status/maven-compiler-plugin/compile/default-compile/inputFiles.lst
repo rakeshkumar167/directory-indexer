@@ -1,0 +1,8 @@
+/Users/zaks/IdeaProjects/directory-indexer/src/main/java/com/example/directoryindexer/service/LuceneIndexService.java
+/Users/zaks/IdeaProjects/directory-indexer/src/main/java/com/example/directoryindexer/model/SearchResult.java
+/Users/zaks/IdeaProjects/directory-indexer/src/main/java/com/example/directoryindexer/service/LuceneSearchService.java
+/Users/zaks/IdeaProjects/directory-indexer/src/main/java/com/example/directoryindexer/controller/SearchController.java
+/Users/zaks/IdeaProjects/directory-indexer/src/main/java/com/example/directoryindexer/service/SearchService.java
+/Users/zaks/IdeaProjects/directory-indexer/src/main/java/com/example/directoryindexer/DirectoryIndexerApplication.java
+/Users/zaks/IdeaProjects/directory-indexer/src/main/java/com/example/directoryindexer/controller/IndexController.java
+/Users/zaks/IdeaProjects/directory-indexer/src/main/java/com/example/directoryindexer/service/IndexingService.java

@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Directory Indexer</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f8f9fa;
+            min-height: 100vh;
+        }
+        .navbar {
+            background: linear-gradient(45deg, #2c3e50, #3498db);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .navbar-brand {
+            color: white !important;
+            font-weight: 600;
+        }
+        .nav-link {
+            color: rgba(255,255,255,0.9) !important;
+            transition: all 0.3s ease;
+        }
+        .nav-link:hover {
+            color: white !important;
+            transform: translateY(-1px);
+        }
+        .search-container {
+            max-width: 800px;
+            margin: 2rem auto;
+            padding: 2rem;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .search-title {
+            color: #2c3e50;
+            margin-bottom: 2rem;
+            text-align: center;
+            font-weight: 600;
+        }
+        .search-form {
+            margin-bottom: 2rem;
+        }
+        .search-input {
+            border-radius: 25px;
+            padding: 1rem 1.5rem;
+            border: 2px solid #e9ecef;
+            transition: all 0.3s ease;
+        }
+        .search-input:focus {
+            border-color: #3498db;
+            box-shadow: 0 0 0 0.25rem rgba(52, 152, 219, 0.15);
+        }
+        .search-button {
+            border-radius: 25px;
+            padding: 0.75rem 2rem;
+            background: linear-gradient(45deg, #3498db, #2980b9);
+            border: none;
+            transition: all 0.3s ease;
+        }
+        .search-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(52, 152, 219, 0.2);
+        }
+        .results-container {
+            margin-top: 2rem;
+        }
+        .result-item {
+            background: white;
+            border-radius: 10px;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            border: 1px solid #e9ecef;
+            transition: all 0.3s ease;
+        }
+        .result-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        .result-path {
+            color: #3498db;
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+        }
+        .result-content {
+            color: #495057;
+            font-size: 0.95rem;
+            line-height: 1.6;
+        }
+        .highlight {
+            background-color: #fff3cd;
+            padding: 0.2rem 0.4rem;
+            border-radius: 3px;
+            font-weight: 500;
+        }
+        .no-results {
+            text-align: center;
+            color: #6c757d;
+            padding: 2rem;
+        }
+        .stats {
+            background: #e9ecef;
+            border-radius: 10px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            color: #495057;
+        }
+        .loading-spinner {
+            display: none;
+            text-align: center;
+            margin: 2rem 0;
+        }
+        .loading-spinner i {
+            font-size: 3rem;
+            color: #3498db;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark mb-4">
+        <div class="container">
+            <a class="navbar-brand" href="/">
+                <i class="fas fa-search me-2"></i>Directory Indexer
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/">
+                            <i class="fas fa-search me-1"></i>Search
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/index">
+                            <i class="fas fa-folder-plus me-1"></i>Index Directory
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="search-container">
+            <h1 class="search-title">
+                <i class="fas fa-search me-2"></i>Search Files
+            </h1>
+            
+            <form th:action="@{/search}" method="get" class="search-form" id="searchForm">
+                <div class="input-group">
+                    <input type="text" name="q" class="form-control search-input" 
+                           th:value="${query}" placeholder="Enter your search query..."
+                           required>
+                    <button type="submit" class="btn btn-primary search-button">
+                        <i class="fas fa-search me-2"></i>Search
+                    </button>
+                </div>
+            </form>
+
+            <div class="loading-spinner" id="loadingSpinner">
+                <i class="fas fa-spinner"></i>
+            </div>
+
+            <div th:if="${query != null}" class="results-container">
+                <div th:if="${results != null and not #lists.isEmpty(results)}" class="stats">
+                    <i class="fas fa-info-circle me-2"></i>
+                    Found <span th:text="${results.size()}"></span> results for "<span th:text="${query}"></span>"
+                </div>
+
+                <div th:each="result : ${results}" class="result-item">
+                    <div class="result-path">
+                        <i class="fas fa-file-alt me-2"></i>
+                        <span th:text="${result.path}"></span>
+                    </div>
+                    <div class="result-content">
+                        <strong>Filename:</strong> <span th:text="${result.filename}"></span>
+                    </div>
+                </div>
+            </div>
+
+            <div th:if="${query != null and (results == null or #lists.isEmpty(results))}" class="no-results">
+                <i class="fas fa-search me-2"></i>
+                No results found for "<span th:text="${query}"></span>"
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.getElementById('searchForm').addEventListener('submit', function() {
+            document.getElementById('loadingSpinner').style.display = 'block';
+        });
+    </script>
+</body>
+</html> 

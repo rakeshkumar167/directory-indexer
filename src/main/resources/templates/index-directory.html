@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Index Directory - Directory Indexer</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f8f9fa;
+            min-height: 100vh;
+        }
+        .navbar {
+            background: linear-gradient(45deg, #2c3e50, #3498db);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .navbar-brand {
+            color: white !important;
+            font-weight: 600;
+        }
+        .nav-link {
+            color: rgba(255,255,255,0.9) !important;
+            transition: all 0.3s ease;
+        }
+        .nav-link:hover {
+            color: white !important;
+            transform: translateY(-1px);
+        }
+        .index-container {
+            max-width: 800px;
+            margin: 2rem auto;
+            padding: 2rem;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .index-title {
+            color: #2c3e50;
+            margin-bottom: 2rem;
+            text-align: center;
+            font-weight: 600;
+        }
+        .index-form {
+            margin-bottom: 2rem;
+        }
+        .form-input {
+            border-radius: 10px;
+            padding: 1rem;
+            border: 2px solid #e9ecef;
+            transition: all 0.3s ease;
+        }
+        .form-input:focus {
+            border-color: #3498db;
+            box-shadow: 0 0 0 0.25rem rgba(52, 152, 219, 0.15);
+        }
+        .submit-button {
+            border-radius: 10px;
+            padding: 0.75rem 2rem;
+            background: linear-gradient(45deg, #3498db, #2980b9);
+            border: none;
+            transition: all 0.3s ease;
+        }
+        .submit-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(52, 152, 219, 0.2);
+        }
+        .progress-container {
+            display: none;
+            margin-top: 2rem;
+        }
+        .progress {
+            height: 25px;
+            border-radius: 12px;
+            background-color: #e9ecef;
+        }
+        .progress-bar {
+            background: linear-gradient(45deg, #3498db, #2980b9);
+            transition: width 0.3s ease;
+        }
+        .status-message {
+            margin-top: 1rem;
+            color: #495057;
+            font-size: 0.95rem;
+        }
+        .log-container {
+            display: none;
+            margin-top: 2rem;
+            max-height: 300px;
+            overflow-y: auto;
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 1rem;
+            font-family: monospace;
+            font-size: 0.9rem;
+        }
+        .log-entry {
+            margin-bottom: 0.5rem;
+            padding: 0.5rem;
+            border-radius: 5px;
+            background: white;
+        }
+        .log-entry.info {
+            border-left: 3px solid #3498db;
+        }
+        .log-entry.warning {
+            border-left: 3px solid #f1c40f;
+        }
+        .log-entry.error {
+            border-left: 3px solid #e74c3c;
+        }
+        .success-message {
+            display: none;
+            text-align: center;
+            color: #27ae60;
+            padding: 2rem;
+        }
+        .error-message {
+            display: none;
+            text-align: center;
+            color: #e74c3c;
+            padding: 2rem;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark mb-4">
+        <div class="container">
+            <a class="navbar-brand" href="/">
+                <i class="fas fa-search me-2"></i>Directory Indexer
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/">
+                            <i class="fas fa-search me-1"></i>Search
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="/index">
+                            <i class="fas fa-folder-plus me-1"></i>Index Directory
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="index-container">
+            <h1 class="index-title">
+                <i class="fas fa-folder-plus me-2"></i>Index Directory
+            </h1>
+            
+            <form th:action="@{/index}" method="post" class="index-form" id="indexForm">
+                <div class="mb-3">
+                    <label for="directoryPath" class="form-label">Directory Path</label>
+                    <input type="text" class="form-control form-input" id="directoryPath" 
+                           name="directoryPath" placeholder="Enter the absolute path of the directory"
+                           required>
+                    <div class="form-text">Enter the absolute path of the directory you want to index.</div>
+                </div>
+                <button type="submit" class="btn btn-primary submit-button">
+                    <i class="fas fa-folder-plus me-2"></i>Start Indexing
+                </button>
+            </form>
+
+            <div class="progress-container" id="progressContainer">
+                <div class="progress">
+                    <div class="progress-bar" role="progressbar" style="width: 0%"></div>
+                </div>
+                <div class="status-message" id="statusMessage">Initializing indexing process...</div>
+            </div>
+
+            <div class="log-container" id="logContainer"></div>
+
+            <div class="success-message" id="successMessage">
+                <i class="fas fa-check-circle me-2"></i>
+                Directory indexed successfully! <span id="documentCount"></span> documents indexed.
+            </div>
+
+            <div class="error-message" id="errorMessage"></div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.getElementById('indexForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const form = this;
+            const progressContainer = document.getElementById('progressContainer');
+            const logContainer = document.getElementById('logContainer');
+            const progressBar = document.querySelector('.progress-bar');
+            const statusMessage = document.getElementById('statusMessage');
+            const successMessage = document.getElementById('successMessage');
+            const errorMessage = document.getElementById('errorMessage');
+            
+            // Reset UI
+            progressContainer.style.display = 'block';
+            logContainer.style.display = 'block';
+            progressBar.style.width = '0%';
+            statusMessage.textContent = 'Initializing indexing process...';
+            successMessage.style.display = 'none';
+            errorMessage.style.display = 'none';
+            logContainer.innerHTML = '';
+            
+            // Disable form
+            form.querySelector('button').disabled = true;
+            
+            // Submit form via AJAX
+            fetch('/index', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: new URLSearchParams(new FormData(form))
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                // Start polling for progress
+                const pollInterval = setInterval(() => {
+                    fetch('/index/progress')
+                        .then(response => response.json())
+                        .then(data => {
+                            // Update progress bar
+                            progressBar.style.width = data.progress + '%';
+                            
+                            // Update status message
+                            statusMessage.textContent = data.status;
+                            
+                            // Add log entries
+                            if (data.logs && data.logs.length > 0) {
+                                data.logs.forEach(log => {
+                                    const logEntry = document.createElement('div');
+                                    logEntry.className = `log-entry ${log.level.toLowerCase()}`;
+                                    logEntry.textContent = `[${log.timestamp}] ${log.message}`;
+                                    logContainer.appendChild(logEntry);
+                                    logContainer.scrollTop = logContainer.scrollHeight;
+                                });
+                            }
+                            
+                            // Check if indexing is complete
+                            if (data.completed) {
+                                clearInterval(pollInterval);
+                                form.querySelector('button').disabled = false;
+                                
+                                if (data.success) {
+                                    successMessage.style.display = 'block';
+                                    document.getElementById('documentCount').textContent = data.documentCount;
+                                } else {
+                                    errorMessage.textContent = data.error || 'An error occurred during indexing.';
+                                    errorMessage.style.display = 'block';
+                                }
+                            }
+                        })
+                        .catch(error => {
+                            clearInterval(pollInterval);
+                            form.querySelector('button').disabled = false;
+                            errorMessage.textContent = 'Failed to communicate with the server.';
+                            errorMessage.style.display = 'block';
+                        });
+                }, 1000);
+            })
+            .catch(error => {
+                clearInterval(pollInterval);
+                form.querySelector('button').disabled = false;
+                errorMessage.textContent = 'Failed to submit the form.';
+                errorMessage.style.display = 'block';
+            });
+        });
+    </script>
+</body>
+</html> 
